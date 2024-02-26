@@ -17,12 +17,13 @@
       "Description": "Name of your EC2 keypair to enable SSH access",
       "Type": "AWS::EC2::KeyPair::KeyName",
       "ConstraintDescription": "Must be the name of an existing KeyPair"
+      
     },
 
     "YourIp": {
       "Description": "Enter your IP address in CIDR notation. Example: \"100.22.33.250/32\"",
       "Type": "String",
-      "ConstraintDescription": "Must be a valid existing IP address"
+      "ConstraintDescription": "Must be a valid existing IP address",
     }
   },
 
@@ -144,16 +145,22 @@
           { "Ref": "WebserversSG"}
         ],
         "KeyName" : {"Ref": "KeyPair"},
-        "UserData": { "Fn::Base64": { "Fn::Join": ["\n", [
-            "#!/bin/bash",
-            "yum update -y",
-            "yum update -y git httpd php",
-            "service httpd start",
-            "chkconfig httpd on",
-            "aws s3 cp s3://seis665-public/index.php /var/www/html/"]]
-          }},
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": ["", [
+             "#!/bin/bash\n",
+             "sudo yum update -y\n",
+             "sudo yum -y install git httpd php\n",
+             "sudo yum update -y git httpd php\n",
+             "sudo service httpd start\n",
+             "sudo chkconfig httpd on\n",
+             "sudo aws s3 cp s3://seis665-public/index.php /var/www/html/\n"
+            ]]
+          }
+        },
         "Tags" : [ { "Key": "Name", "Value": "web1" } ]
-      }
+      },
+      "DependsOn": [ "PublicRoute"]
     },
 
     "web2": {
@@ -169,16 +176,22 @@
             { "Ref": "WebserversSG"}
           ],
           "KeyName" : {"Ref": "KeyPair"},
-          "UserData": { "Fn::Base64": { "Fn::Join": ["\n", [
-            "#!/bin/bash",
-            "yum update -y",
-            "yum update -y git httpd php",
-            "service httpd start",
-            "chkconfig httpd on",
-            "aws s3 cp s3://seis665-public/index.php /var/www/html/"]]
-          }},
+          "UserData": {
+             "Fn::Base64": {
+               "Fn::Join": ["", [
+                "#!/bin/bash\n",
+                "sudo yum update -y\n",
+                "sudo yum -y install git httpd php\n",
+                "sudo yum update -y git httpd php\n",
+                "sudo service httpd start\n",
+                "sudo chkconfig httpd on\n",
+                "sudo aws s3 cp s3://seis665-public/index.php /var/www/html/\n"
+              ]]
+            }
+          },
           "Tags" : [ { "Key": "Name", "Value": "web2" } ]
-        }
+        },
+        "DependsOn": ["PublicRoute"]
       },
 
     "WebserversSG": {
@@ -296,8 +309,6 @@
           ]
       }
     }
-
-
   },
 
   "Outputs": {
@@ -334,7 +345,7 @@
             ]
           ]
         },
-        "Description": "web1 URL"
+        "Description": "web2 URL"
       },
 
     "WebUrl": {
